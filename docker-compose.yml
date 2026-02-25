@@ -29,6 +29,8 @@ services:
       - TZ=Asia/Shanghai
       - HOST=0.0.0.0 # 主程序监听地址（容器内建议0.0.0.0）
       - PORT=8000 # 主程序消息端口
+      - WEBUI_HOST=0.0.0.0 # WebUI监听地址（容器内必须0.0.0.0，避免外部无法访问）
+      - WEBUI_PORT=8001 # WebUI端口
       - EULA_AGREE=1b662741904d7155d1ce1c00b3530d0d # 同意EULA
       - PRIVACY_AGREE=9943b855e72199d0f5016ea39052f1b6 # 同意隐私条款
     ports:

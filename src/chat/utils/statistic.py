@@ -1,6 +1,7 @@
 import asyncio
 import concurrent.futures
 import json
+import os
 
 from collections import defaultdict
 from datetime import datetime, timedelta
@@ -184,6 +185,13 @@ class StatisticOutputTask(AsyncTask):
         """
 
         self.record_file_path: str = record_file_path
+        # 兼容 Docker 挂载误配置：当目标路径是目录时，自动落到目录内的 maibot_statistics.html
+        try:
+            if os.path.isdir(self.record_file_path):
+                self.record_file_path = os.path.join(self.record_file_path, "maibot_statistics.html")
+        except Exception:
+            # 保持原路径，后续写入时再兜底
+            pass
         """
         记录文件路径
         """
@@ -1504,7 +1512,17 @@ class StatisticOutputTask(AsyncTask):
         """
         )
 
-        with open(self.record_file_path, "w", encoding="utf-8") as f:
+        target_path = self.record_file_path
+        # 兜底处理：若路径是目录，则在目录内生成默认文件
+        if os.path.isdir(target_path):
+            target_path = os.path.join(target_path, "maibot_statistics.html")
+
+        # 若父目录不存在则自动创建
+        parent_dir = os.path.dirname(target_path)
+        if parent_dir:
+            os.makedirs(parent_dir, exist_ok=True)
+
+        with open(target_path, "w", encoding="utf-8") as f:
             f.write(html_template)
 
     def _generate_chart_data(self, stat: dict[str, Any]) -> dict:
